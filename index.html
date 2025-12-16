@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Service System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');
+        body { font-family: 'Sarabun', sans-serif; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div id="loginSection" class="min-h-screen flex items-center justify-center bg-blue-600 p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+            <h2 class="text-2xl font-bold text-center mb-6 text-blue-800">AIR SERVICE LOGIN</h2>
+            <div class="space-y-4">
+                <input type="text" id="username" placeholder="เบอร์โทรลูกค้า / ID พนักงาน" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="password" placeholder="รหัสผ่าน (เฉพาะพนักงาน)" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="button" onclick="handleLogin()" class="w-full bg-blue-700 text-white py-3 rounded-xl font-bold hover:bg-blue-800 shadow-lg transition-all active:scale-95">
+                    เข้าสู่ระบบ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" class="hidden min-h-screen flex flex-col md:flex-row">
+        <aside class="w-full md:w-64 bg-blue-900 text-white p-6">
+            <h1 class="text-xl font-bold mb-8 italic text-blue-300 underline">STAFF PANEL</h1>
+            <button onclick="window.location.reload()" class="w-full text-left p-3 text-red-400 hover:bg-blue-800 rounded-lg"><i class="fas fa-sign-out-alt mr-2"></i> ออกจากระบบ</button>
+        </aside>
+        <main class="flex-1 p-6 overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-4">สต็อกสินค้า</h2>
+            <div id="inventory" class="bg-white p-4 rounded-xl shadow mb-8">กำลังดึงข้อมูล...</div>
+
+            <h2 class="text-2xl font-bold mb-4">บันทึกการขายใหม่</h2>
+            <div class="bg-white p-6 rounded-xl shadow border grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="cust_name" placeholder="ชื่อลูกค้า" class="p-2 border rounded">
+                <input type="tel" id="cust_phone" placeholder="เบอร์โทร" class="p-2 border rounded">
+                <input type="text" id="cust_addr" placeholder="ที่อยู่" class="p-2 border rounded md:col-span-2">
+                <input type="text" id="prod_model" placeholder="รุ่นแอร์" class="p-2 border rounded">
+                <button onclick="saveSale()" id="btnSave" class="bg-green-600 text-white p-3 rounded-xl font-bold hover:bg-green-700">บันทึกข้อมูล</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="customerApp" class="hidden min-h-screen bg-blue-50 p-6 flex items-center justify-center">
+        <div class="w-full max-w-md bg-white p-6 rounded-3xl shadow-xl">
+            <div id="warrantyResult" class="text-center text-gray-600">กำลังค้นหา...</div>
+            <button onclick="window.location.reload()" class="w-full mt-6 text-blue-600 font-bold">กลับหน้าหลัก</button>
+        </div>
+    </div>
+
+    <script>
+        // *** สำคัญ: ต้องใส่ URL ของคุณให้ถูกต้อง ***
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTmGDiTxHhRmvxoT4O0hLEh4OdsMqsiCYm0lbKm7u1taA53nTLfev9okyGv19Vk7rlbg/exec";
+
+        function handleLogin() {
+            console.log("ปุ่มถูกกดแล้ว!");
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+
+            if (user === "") { alert("กรุณากรอกชื่อผู้ใช้!"); return; }
+
+            document.getElementById('loginSection').classList.add('hidden');
+
+            if (pass !== "") {
+                document.getElementById('mainApp').classList.remove('hidden');
+                loadInventory();
+            } else {
+                document.getElementById('customerApp').classList.remove('hidden');
+                checkWarranty(user);
+            }
+        }
+
+        async function loadInventory() {
+            const div = document.getElementById('inventory');
+            try {
+                const res = await fetch(WEB_APP_URL + "?action=getInventory");
+                const data = await res.json();
+                let html = "";
+                data.forEach(item => { html += `<div class="p-2 border-b">${item[1]} (คงเหลือ: ${item[3]})</div>`; });
+                div.innerHTML = html || "ไม่มีข้อมูลสต็อก";
+            } catch (e) { div.innerHTML = "โหลดสต็อกล้มเหลว"; }
+        }
+
+        async function checkWarranty(phone) {
+            const div = document.getElementById('warrantyResult');
+            try {
+                const res = await fetch(WEB_APP_URL + "?action=checkWarranty&phone=" + phone);
+                const data = await res.json();
+                if (data.length === 0) {
+                    div.innerHTML = "<p class='text-red-500 font-bold'>ไม่พบข้อมูลเบอร์นี้</p>";
+                } else {
+                    div.innerHTML = `<h3 class='text-xl font-bold'>คุณ ${data[0][2]}</h3><p>รุ่น: ${data[0][5]}</p><p class='text-red-500'>หมดประกัน: ${data[0][6]}</p>`;
+                }
+            } catch (e) { div.innerHTML = "การเชื่อมต่อผิดพลาด"; }
+        }
+
+        async function saveSale() {
+            const btn = document.getElementById('btnSave');
+            const payload = {
+                targetSheet: 'Sales',
+                rowData: [new Date().toLocaleDateString('th-TH'), "", document.getElementById('cust_name').value, document.getElementById('cust_addr').value, document.getElementById('cust_phone').value, document.getElementById('prod_model').value, "1 ปีหลังจากนี้"]
+            };
+            btn.disabled = true; btn.innerText = "กำลังบันทึก...";
+            try {
+                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                alert("บันทึกสำเร็จ!");
+                location.reload();
+            } catch (e) { alert("ล้มเหลว: " + e); btn.disabled = false; btn.innerText = "บันทึกข้อมูล"; }
+        }
+    </script>
+</body>
+</html>
