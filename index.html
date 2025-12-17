@@ -39,7 +39,7 @@
         </button>async function handleLogin() {
     const empId = document.getElementById('empId').value;
     const password = document.getElementById('password').value;
-    const WEB_APP_URL = 'เอา_URL_ใหม่ที่เพิ่งก๊อปมา_วางที่นี่'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw_cYph7REsiwm7EN9p8qeKdyLvYiTehQpbS8SukGQIdg_ojpgMyVkt9DfNgQof-M6YfA/exec'; 
 
     const response = await fetch(`${WEB_APP_URL}?action=login&empId=${empId}&password=${password}`);
     const result = await response.json();
@@ -174,5 +174,6 @@
 </body>
 
 </html>
+
 
 
