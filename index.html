@@ -36,7 +36,24 @@
         
         <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-md">
             เข้าสู่ระบบ
-        </button>
+        </button>async function handleLogin() {
+    const empId = document.getElementById('empId').value;
+    const password = document.getElementById('password').value;
+    const WEB_APP_URL = 'เอา_URL_ใหม่ที่เพิ่งก๊อปมา_วางที่นี่'; 
+
+    const response = await fetch(`${WEB_APP_URL}?action=login&empId=${empId}&password=${password}`);
+    const result = await response.json();
+
+    if (result.success === true) {
+        // ✅ ถ้าถูก ให้ทำในนี้
+        alert("ยินดีต้อนรับคุณ " + result.name);
+        document.getElementById('login-section').classList.add('hidden'); // ซ่อนหน้าล็อกอิน
+        document.getElementById('employee-dashboard').classList.remove('hidden'); // โชว์หน้าทำงาน
+    } else {
+        // ❌ ถ้าผิด ให้แจ้งเตือนและ "ไม่ให้ไปไหน"
+        alert("ขออภัย! ไอดีหรือรหัสผ่านไม่ถูกต้อง");
+    }
+}
     </div>
 </div>
     <div id="mainApp" class="hidden min-h-screen flex flex-col md:flex-row">
@@ -157,4 +174,5 @@
 </body>
 
 </html>
+
 
