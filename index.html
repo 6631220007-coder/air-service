@@ -145,12 +145,34 @@
     </script>async function handleLogin() {
     const empId = document.getElementById('empId').value;
     const password = document.getElementById('password').value;
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwi-35S5EntKnGB5oh9M1P48NN-YdDzIwcuAE7KGKV4vhXRhbg2Ete91nqU91GgfT64nA/exec'; // อย่าลืมใส่ URL ของคุณนะคะ
+    
+    // ⚠️ สำคัญ: ต้องใส่ URL ของคุณในเครื่องหมาย ' ' นี้นะคะ
+    const WEB_APP_URL = 'ใส่_URL_ของ_APPS_SCRIPT_ตรงนี้'; 
 
     if (!empId || !password) {
-        alert("กรุณากรอกทั้งไอดีและรหัสผ่านค่ะ");
+        alert("กรุณากรอกไอดีและรหัสผ่านค่ะ");
         return;
     }
+
+    try {
+        const response = await fetch(`${WEB_APP_URL}?action=login&empId=${empId}&password=${password}`);
+        const result = await response.json();
+
+        // --- จุดที่ต้องเช็คเป็นพิเศษ ---
+        if (result.success === true) { 
+            // ✅ ถ้าสำเร็จ ถึงจะให้ทำคำสั่งข้างล่างนี้
+            alert("ยินดีต้อนรับคุณ " + result.name);
+            document.getElementById('login-section').classList.add('hidden'); 
+            document.getElementById('employee-dashboard').classList.remove('hidden'); 
+        } else {
+            // ❌ ถ้าไม่สำเร็จ ให้แจ้งเตือนและหยุดแค่นี้
+            alert("ไอดีหรือรหัสผ่านไม่ถูกต้อง! โปรดตรวจสอบอีกครั้ง");
+        }
+        // ----------------------------
+    } catch (e) {
+        alert("เกิดข้อผิดพลาดในการเชื่อมต่อ: " + e);
+    }
+}
 
     // เรียกไปที่ Google Apps Script เพื่อเช็ก Login
     const url = `${WEB_APP_URL}?action=login&empId=${empId}&password=${password}`;
@@ -174,6 +196,7 @@
 </body>
 
 </html>
+
 
 
 
